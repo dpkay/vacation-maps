@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kefalonia highlights map — Aug 25 – Sep 3</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  * { margin: 0; box-sizing: border-box; }
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
+    --water: #2a78d6; --kid: #eb6834; --town: #1baf7a;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page); color: var(--text-primary);
+    min-height: 100vh; padding: 24px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7;
+      --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+      --water: #3987e5; --kid: #d95926; --town: #199e70;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7;
+    --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+    --water: #3987e5; --kid: #d95926; --town: #199e70;
+  }
+  .card { max-width: 980px; margin: 0 auto; background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  h1 { font-size: 16px; font-weight: 600; }
+  .sub { font-size: 13px; color: var(--text-secondary); margin: 2px 0 12px; }
+  #map { height: 620px; border-radius: 8px; border: 1px solid var(--border); }
+  .legend { display: flex; gap: 18px; margin: 12px 0 4px; font-size: 12.5px; color: var(--text-secondary); flex-wrap: wrap; }
+  .legend .key { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  h2 { font-size: 13.5px; font-weight: 600; margin: 16px 0 4px; }
+  ul { margin: 2px 0 0 18px; font-size: 13px; }
+  li { margin: 3px 0; }
+  .note { color: var(--text-secondary); }
+  .home-icon { font-size: 20px; line-height: 20px; text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+  .leaflet-tooltip.base-label { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+  <div class="card">
+    <h1>Kefalonia Aug 25 – Sep 3: highlight superset + base zones</h1>
+    <div class="sub">🏠 = lodging base candidates (Variant A = one of the southern three; Variant B adds Agia Efimia). Click markers for details. Map tiles need internet (OpenStreetMap).</div>
+    <div id="map"></div>
+    <div class="legend">
+      <span class="key"><span class="dot" style="background:var(--water)"></span>Beaches &amp; water</span>
+      <span class="key"><span class="dot" style="background:var(--kid)"></span>Nature &amp; kid specials</span>
+      <span class="key"><span class="dot" style="background:var(--town)"></span>Old towns &amp; villages</span>
+      <span class="key"><span class="home-icon">🏠</span>Base candidates</span>
+      <span class="key"><span class="dot" style="background:#898781"></span>Anchors / logistics</span>
+    </div>
+    <h2>Reading the spread</h2>
+    <ul>
+      <li><b>South cluster</b> (Svoronata–Lassi–Lourdata): sandy kid beaches + airport + Argostoli — daily life under Variant A.</li>
+      <li><b>East-center cluster</b> (Sami/Agia Efimia): both caves, Karavomilos lake, Antisamos — one compact cave-and-swim zone.</li>
+      <li><b>North string</b> (Myrtos → Assos → Fiskardo/Emblisi/Foki): the scenic old-Kefalonia day(s) — farthest from any southern base.</li>
+      <li><b>Lixouri peninsula</b> (Xi, Petani): reached via the Argostoli car ferry — a self-contained day.</li>
+    </ul>
+    <p class="note" style="font-size:12.5px; margin-top:8px;">Coordinates approximate — for orientation, not navigation.</p>
+  </div>
+</div>
+<script>
+const map = L.map('map', { scrollWheelZoom: true });
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+const CS = getComputedStyle(document.querySelector('.viz-root'));
+const CAT = { water: CS.getPropertyValue('--water').trim(), kid: CS.getPropertyValue('--kid').trim(), town: CS.getPropertyValue('--town').trim(), anchor: '#898781' };
+
+const POIS = [
+  // beaches & water
+  {n:"Xi Beach", c:"water", ll:[38.155, 20.408], d:"THE calm-water beach: warm, waist-deep for 50+ m, red sand, self-painting clay. Via Lixouri ferry."},
+  {n:"Petani Beach", c:"water", ll:[38.243, 20.375], d:"Dramatic west-coast beauty — waves possible; more for the view + sunset than toddler swimming."},
+  {n:"Makris Gialos (Lassi)", c:"water", ll:[38.166, 20.475], d:"Golden sand; calmest mornings, small afternoon waves."},
+  {n:"Ammes Beach", c:"water", ll:[38.110, 20.545], d:"Small, sandy, shallow; planes overhead = 5yo entertainment."},
+  {n:"Lourdata Beach", c:"water", ll:[38.108, 20.638], d:"Long beach below a green mountainside; village square above."},
+  {n:"Katelios", c:"water", ll:[38.065, 20.748], d:"Sleepy fishing bay, shallow sand, fish tavernas on the beach."},
+  {n:"Skala Beach", c:"water", ll:[38.075, 20.795], d:"Long Blue-Flag sandy beach, gradual entry, full facilities."},
+  {n:"Antisamos", c:"water", ll:[38.257, 20.665], d:"Green-hills bay, white pebbles, crystal water. Water shoes."},
+  {n:"Myrtos (viewpoint!)", c:"water", ll:[38.342, 20.535], d:"The postcard. NOT for small-kid swimming (steep, surf) — 10-min photo stop from the road."},
+  {n:"Emblisi", c:"water", ll:[38.470, 20.570], d:"Pebble cove in olive/cypress near Fiskardo."},
+  {n:"Foki", c:"water", ll:[38.455, 20.580], d:"Shady, usually mirror-calm pebble cove; pairs with Fiskardo."},
+  // nature & kid specials
+  {n:"Melissani Cave", c:"kid", ll:[38.256, 20.623], d:"Roofless lake cave, rowboat ride. Go 11:30–13:30 for the sun shaft."},
+  {n:"Drogarati Cave", c:"kid", ll:[38.230, 20.626], d:"Big dripstone chamber; pairs with Melissani as the cave day."},
+  {n:"Karavomilos Lake", c:"kid", ll:[38.258, 20.637], d:"Round pond where Melissani's water resurfaces; ducks + taverna. 30-min filler."},
+  {n:"Argostoli turtles (Koutavos)", c:"kid", ll:[38.175, 20.492], d:"Loggerheads cruise the quay most mornings ~8–10. Combine with market + Lithostroto."},
+  {n:"Mt. Ainos NP", c:"kid", ll:[38.135, 20.655], d:"Black-fir national park, semi-wild horses, cool air, fire-road walks."},
+  {n:"Robola winery co-op", c:"kid", ll:[38.175, 20.590], d:"Casual tastings in the high Omala valley; kids can run. Pairs with Ainos."},
+  // old towns & villages
+  {n:"Fiskardo", c:"town", ll:[38.460, 20.576], d:"Intact 18th-c Venetian harbor village — earthquake survivor #1. Best late afternoon/evening."},
+  {n:"Assos", c:"town", ll:[38.379, 20.537], d:"Tiny peninsula village + Venetian castle path + calm harbor cove swim. Survivor #2."},
+  {n:"Agia Efimia harbor", c:"town", ll:[38.302, 20.598], d:"Working fishing harbor, waterfront tavernas, evening volta."},
+  // anchors
+  {n:"EFL Airport", c:"anchor", ll:[38.120, 20.500], d:"Land 09:45 Aug 25; car pickup 10:00 (Idea Mobility). Depart 19:10 Sep 3."},
+  {n:"Argostoli", c:"anchor", ll:[38.181, 20.489], d:"Capital: Lithostroto street, De Bosset bridge, Saturday market, ferry to Lixouri."},
+  {n:"Lixouri (ferry port)", c:"anchor", ll:[38.201, 20.437], d:"Car ferry from Argostoli every 30–60 min, ~30 min crossing — a mini-cruise."},
+  {n:"Sami", c:"anchor", ll:[38.250, 20.650], d:"Port town near the caves; harbor evening option."},
+];
+
+const BASES = [
+  {n:"Svoronata/Ammes", ll:[38.113, 20.540], dir:"left", d:"Quiet village near airport + Ammes beach."},
+  {n:"Lassi", ll:[38.172, 20.470], dir:"left", d:"Most infrastructure, biggest sandy beaches, most touristy."},
+  {n:"Lourdata", ll:[38.115, 20.635], dir:"right", d:"Sleeper pick: village square + long beach, more local."},
+  {n:"Agia Efimia", ll:[38.308, 20.592], dir:"top", d:"Variant B's second base (or A2): harbor village, central for caves + north."},
+];
+
+POIS.forEach(p => {
+  L.circleMarker(p.ll, { radius: p.c === "anchor" ? 6 : 9, color: "#ffffff", weight: 2, fillColor: CAT[p.c], fillOpacity: 1 })
+    .addTo(map)
+    .bindTooltip(`<b>${p.n}</b>`, {direction: "top", offset: [0, -8]})
+    .bindPopup(`<b>${p.n}</b><br>${p.d}`);
+});
+BASES.forEach(b => {
+  L.marker(b.ll, {icon: L.divIcon({className: "", html: '<div class="home-icon">🏠</div>', iconSize: [20, 20], iconAnchor: [10, 10]})})
+    .addTo(map)
+    .bindTooltip(b.n, {permanent: true, direction: b.dir, offset: b.dir === "left" ? [-10, 0] : b.dir === "top" ? [0, -10] : [10, 0], className: "base-label"})
+    .bindPopup(`<b>${b.n}</b><br>${b.d}`);
+});
+// Lixouri car ferry
+L.polyline([[38.181, 20.489], [38.201, 20.437]], {color: "#898781", weight: 2, dashArray: "6 6"})
+  .addTo(map).bindTooltip("Argostoli–Lixouri car ferry, ~30 min", {sticky: true});
+
+map.setView([38.26, 20.58], 10);
+</script>
+</body>
+</html>

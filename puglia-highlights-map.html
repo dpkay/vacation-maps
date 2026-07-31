@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puglia highlights map — Sep 3–8</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  * { margin: 0; box-sizing: border-box; }
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
+    --water: #2a78d6; --kid: #eb6834; --town: #1baf7a;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page); color: var(--text-primary);
+    min-height: 100vh; padding: 24px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7;
+      --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+      --water: #3987e5; --kid: #d95926; --town: #199e70;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7;
+    --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+    --water: #3987e5; --kid: #d95926; --town: #199e70;
+  }
+  .card { max-width: 980px; margin: 0 auto; background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  h1 { font-size: 16px; font-weight: 600; }
+  .sub { font-size: 13px; color: var(--text-secondary); margin: 2px 0 12px; }
+  #map { height: 620px; border-radius: 8px; border: 1px solid var(--border); }
+  .legend { display: flex; gap: 18px; margin: 12px 0 4px; font-size: 12.5px; color: var(--text-secondary); flex-wrap: wrap; }
+  .legend .key { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  h2 { font-size: 13.5px; font-weight: 600; margin: 16px 0 4px; }
+  ul { margin: 2px 0 0 18px; font-size: 13px; }
+  li { margin: 3px 0; }
+  .note { color: var(--text-secondary); }
+  .home-icon { font-size: 20px; line-height: 20px; text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+  .leaflet-tooltip.base-label { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+  <div class="card">
+    <h1>Puglia Sep 3–8: highlight superset + base zones</h1>
+    <div class="sub">🏠 = single-base candidates (masseria triangle vs Monopoli town). Matera is the Sep 8 transfer-day stop toward Naples. Click markers for details. Map tiles need internet (OpenStreetMap).</div>
+    <div id="map"></div>
+    <div class="legend">
+      <span class="key"><span class="dot" style="background:var(--water)"></span>Beaches &amp; lidos</span>
+      <span class="key"><span class="dot" style="background:var(--kid)"></span>Kid specials</span>
+      <span class="key"><span class="dot" style="background:var(--town)"></span>Old towns &amp; culture</span>
+      <span class="key"><span class="home-icon">🏠</span>Base candidates</span>
+      <span class="key"><span class="dot" style="background:#898781"></span>Anchors / logistics</span>
+    </div>
+    <h2>Reading the spread</h2>
+    <ul>
+      <li><b>Everything lives in a ~30 km circle</b> around the masseria triangle — white towns inland, lidos on the coast, caves and safari in between. No day exceeds ~40 min from either base.</li>
+      <li><b>Bari Vecchia</b> is best on arrival-adjacent or departure logic (30–50 min north), <b>Torre Guaceto + Ostuni</b> pair naturally to the south.</li>
+      <li><b>Matera</b> (1 h inland) is not a day trip — it's the built-in stop on the Sep 8 drive to Naples.</li>
+    </ul>
+    <p class="note" style="font-size:12.5px; margin-top:8px;">Coordinates approximate — for orientation, not navigation. ZTL warning: park outside every old town's walls.</p>
+  </div>
+</div>
+<script>
+const map = L.map('map', { scrollWheelZoom: true });
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+const CS = getComputedStyle(document.querySelector('.viz-root'));
+const CAT = { water: CS.getPropertyValue('--water').trim(), kid: CS.getPropertyValue('--kid').trim(), town: CS.getPropertyValue('--town').trim(), anchor: '#898781' };
+
+const POIS = [
+  // beaches & lidos
+  {n:"Capitolo lidos", c:"water", ll:[40.905, 17.363], d:"Sandy, shallow, organized lidos — the daily default beach."},
+  {n:"Torre Canne", c:"water", ll:[40.833, 17.465], d:"Long sandy shallows, low-key family lidos; closest to the masseria triangle."},
+  {n:"Cala Porta Vecchia", c:"water", ll:[40.957, 17.306], d:"Tiny town beach under Monopoli's walls — atmosphere over comfort, calm mornings."},
+  {n:"Torre Guaceto reserve", c:"water", ll:[40.717, 17.800], d:"Protected reserve beach (shuttle/walk in) — clearest water; pair with Ostuni."},
+  {n:"Savelletri harbor", c:"water", ll:[40.885, 17.395], d:"Fishing harbor, sea-urchin trattorias, rock platforms."},
+  // kid specials
+  {n:"Grotte di Castellana", c:"kid", ll:[40.883, 17.187], d:"Huge dripstone caves; 50-min short tour = kid-length. Cool at midday."},
+  {n:"Zoosafari Fasanolandia", c:"kid", ll:[40.868, 17.343], d:"Drive-through safari in your own car — giraffes at the window. Half day."},
+  {n:"Polignano boat caves", c:"kid", ll:[40.999, 17.213], d:"1–1.5 h sea-grotto cruise, calm mornings."},
+  {n:"Egnazia ruins", c:"kid", ll:[40.888, 17.390], d:"Roman city by the sea — kids run the ruins, parents get the museum. 1–2 h."},
+  // old towns & culture
+  {n:"Alberobello", c:"town", ll:[40.782, 17.237], d:"The trulli town. Before 9:30 or after 17:00; Rione Aia Piccola = quiet half."},
+  {n:"Locorotondo", c:"town", ll:[40.755, 17.326], d:"White circular hill town; 1-h stroll + lunch."},
+  {n:"Cisternino", c:"town", ll:[40.742, 17.423], d:"Bombette at a macelleria-grill — pick meat at the counter, they grill it."},
+  {n:"Martina Franca", c:"town", ll:[40.705, 17.336], d:"Baroque big sibling of the white towns; evening passeggiata."},
+  {n:"Ostuni", c:"town", ll:[40.729, 17.578], d:"The White City. Stroller-hostile lanes — carrier for the 3.5yo."},
+  {n:"Monopoli old town", c:"town", ll:[40.954, 17.303], d:"Whitewashed port old town; morning fish market at the harbor."},
+  {n:"Polignano a Mare", c:"town", ll:[40.995, 17.220], d:"Lama Monachile cliff cove — postcard + gelato; visit, don't beach-day."},
+  {n:"Bari Vecchia", c:"town", ll:[41.128, 16.870], d:"Strada delle Orecchiette — nonnas making pasta in the street."},
+  {n:"Matera (Sep 8 stop)", c:"town", ll:[40.666, 16.610], d:"Sassi cave city — 2–3 h + lunch on the transfer day; carrier, not stroller. Then ~2h45 to Naples."},
+  // anchors
+  {n:"Bari Airport", c:"anchor", ll:[41.139, 16.765], d:"Land 20:15 Sep 3; car pickup ~20:45; ~50 min to the bases."},
+];
+
+const BASES = [
+  {n:"Masseria triangle", ll:[40.845, 17.415], dir:"right", d:"Savelletri–Fasano–Ostuni countryside: masseria/trullo with pool; 15–25 min to everything."},
+  {n:"Monopoli", ll:[40.945, 17.290], dir:"left", d:"Town-base variant: old town + harbor at the doorstep, lidos 5–10 min. Confirm parking/ZTL."},
+];
+
+POIS.forEach(p => {
+  L.circleMarker(p.ll, { radius: p.c === "anchor" ? 6 : 9, color: "#ffffff", weight: 2, fillColor: CAT[p.c], fillOpacity: 1 })
+    .addTo(map)
+    .bindTooltip(`<b>${p.n}</b>`, {direction: "top", offset: [0, -8]})
+    .bindPopup(`<b>${p.n}</b><br>${p.d}`);
+});
+BASES.forEach(b => {
+  L.marker(b.ll, {icon: L.divIcon({className: "", html: '<div class="home-icon">🏠</div>', iconSize: [20, 20], iconAnchor: [10, 10]})})
+    .addTo(map)
+    .bindTooltip(b.n, {permanent: true, direction: b.dir, offset: b.dir === "left" ? [-10, 0] : [10, 0], className: "base-label"})
+    .bindPopup(`<b>${b.n}</b><br>${b.d}`);
+});
+// Sep 8 transfer: base → Matera → (Naples)
+L.polyline([[40.845, 17.415], [40.666, 16.610]], {color: "#898781", weight: 2, dashArray: "6 6"})
+  .addTo(map).bindTooltip("Sep 8: base → Matera (~1 h) → Naples (~2 h 45)", {sticky: true});
+
+map.setView([40.90, 17.21], 10);
+</script>
+</body>
+</html>

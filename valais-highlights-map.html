@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Valais highlights map — Aug 16–24</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  * { margin: 0; box-sizing: border-box; }
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
+    --lake: #2a78d6; --play: #eb6834; --thermal: #1baf7a;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page); color: var(--text-primary);
+    min-height: 100vh; padding: 24px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7;
+      --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+      --lake: #3987e5; --play: #d95926; --thermal: #199e70;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7;
+    --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+    --lake: #3987e5; --play: #d95926; --thermal: #199e70;
+  }
+  .card {
+    max-width: 980px; margin: 0 auto;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px;
+  }
+  h1 { font-size: 16px; font-weight: 600; }
+  .sub { font-size: 13px; color: var(--text-secondary); margin: 2px 0 12px; }
+  #map { height: 600px; border-radius: 8px; border: 1px solid var(--border); }
+  .legend { display: flex; gap: 18px; margin: 12px 0 4px; font-size: 12.5px; color: var(--text-secondary); flex-wrap: wrap; }
+  .legend .key { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  h2 { font-size: 13.5px; font-weight: 600; margin: 16px 0 4px; }
+  ul { margin: 2px 0 0 18px; font-size: 13px; }
+  li { margin: 3px 0; }
+  li b { font-weight: 600; }
+  .note { color: var(--text-secondary); }
+  .home-icon { font-size: 20px; line-height: 20px; text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+  .leaflet-tooltip.base-label { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+  <div class="card">
+    <h1>Valais Aug 16–24: the highlight superset + Airbnb search zones</h1>
+    <div class="sub">Drive times in the list are from Visp. Everything shown is ≤ ~45 min except the Oeschinensee bonus (via Lötschberg car train, dashed line). Map tiles need internet (OpenStreetMap).</div>
+    <div id="map"></div>
+    <div class="legend">
+      <span class="key"><span class="dot" style="background:var(--lake)"></span>Mountain lakes &amp; rivers</span>
+      <span class="key"><span class="dot" style="background:var(--play)"></span>Playgrounds &amp; kid trails</span>
+      <span class="key"><span class="dot" style="background:var(--thermal)"></span>Thermal / rainy-day</span>
+      <span class="key"><span class="home-icon">🏠</span>Airbnb base candidates (altitude!)</span>
+      <span class="key"><span class="dot" style="background:#898781"></span>Anchor towns / logistics</span>
+    </div>
+
+    <h2>🏠 Where to search for the Airbnb (elevation = A/C; aim ≥ 1,200 m)</h2>
+    <ul>
+      <li><b>Grächen (1,620 m)</b> — coolest; the Spieleweg is in-village; dead-end road, 30 min to Visp</li>
+      <li><b>Bürchen / Unterbäch (~1,350 m)</b> — sunny terrace above the valley, Moosalp out the back door, 20 min to Visp</li>
+      <li><b>Visperterminen (1,340 m)</b> — quiet wine-village terrace, 20 min to Visp, closest to Saas valley</li>
+      <li><b>Naters / Blatten-bei-Naters (700 / 1,320 m)</b> — Brig side, closest to Aletsch + Brigerbad</li>
+      <li><b>Visp or Brig town (650–680 m)</b> — fallback only: most supply, most central, but hot in August</li>
+    </ul>
+
+    <h2>The highlights (superset — more than the 8 days can hold)</h2>
+    <ul>
+      <li><b>Leisee / Sunnegga</b> — swimmable lake + Wolli playground + Matterhorn (Täsch 25 min + train + funicular)</li>
+      <li><b>Riffelsee</b> — Gornergrat railway, Rotenboden→Riffelberg walk (~2.5 km downhill)</li>
+      <li><b>Grächen: Ravensburger Spieleweg + Hannigalp</b> — board-game trail, ~4 km (30 min)</li>
+      <li><b>Saas-Fee / Spielboden marmots</b> — car-free village, hand-fed marmots (35 min)</li>
+      <li><b>Bettmeralp</b> — car-free plateau, Blausee loop, Bettmerhorn glacier lookout (Betten lift, 35 min)</li>
+      <li><b>Riederalp</b> — the quieter Aletsch plateau variant (Mörel lift, 30 min)</li>
+      <li><b>Fafleralp, Lötschental</b> — flat glacier-river walk, Grundsee/Schwarzsee (40 min)</li>
+      <li><b>Gemmi / Daubensee</b> — cable car above Leukerbad, flat lake loop (35 min + lift)</li>
+      <li><b>Moosalp</b> — ponds, cows, easy trails, above Bürchen (25 min)</li>
+      <li><b>Leukerbad thermal</b> — big pool complex, rainy-day banker (35 min)</li>
+      <li><b>Brigerbad thermal water park</b> — outdoor slides, the low-effort day (15 min)</li>
+      <li class="note"><b>Bonus: Oeschinensee</b> — arguably Switzerland's best kid mountain lake; reachable as a long day via the Lötschberg car train (~1h10) or saved for a future Bernese Oberland trip</li>
+    </ul>
+    <p class="note" style="font-size:12.5px; margin-top:10px;">Coordinates are approximate (village/lift-base level) — for orientation and Airbnb zoning, not navigation.</p>
+  </div>
+</div>
+<script>
+const map = L.map('map', { scrollWheelZoom: true });
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 17,
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+const CAT = {
+  lake:   getComputedStyle(document.querySelector('.viz-root')).getPropertyValue('--lake').trim(),
+  play:   getComputedStyle(document.querySelector('.viz-root')).getPropertyValue('--play').trim(),
+  thermal:getComputedStyle(document.querySelector('.viz-root')).getPropertyValue('--thermal').trim(),
+  anchor: '#898781'
+};
+
+const POIS = [
+  // lakes & rivers
+  {n:"Leisee / Sunnegga", c:"lake", ll:[46.010, 7.772], d:"Swimmable lake, Wolli playground, Matterhorn view. Täsch 25 min + train + funicular."},
+  {n:"Riffelsee", c:"lake", ll:[45.987, 7.777], d:"Gornergrat railway → Rotenboden → Riffelberg walk (~2.5 km downhill)."},
+  {n:"Fafleralp (Lötschental)", c:"lake", ll:[46.427, 7.866], d:"Flat glacier-river valley walk, Grundsee/Schwarzsee. 40 min."},
+  {n:"Gemmi / Daubensee", c:"lake", ll:[46.399, 7.607], d:"Cable car above Leukerbad, flat lake loop. 35 min + lift."},
+  {n:"Moosalp", c:"lake", ll:[46.245, 7.796], d:"Ponds, cows, easy trails. 25 min, above Bürchen."},
+  {n:"Oeschinensee (bonus)", c:"lake", ll:[46.499, 7.725], d:"Via Lötschberg car train ~1h10. Swimmable, rowboats, Rodelbahn."},
+  // playgrounds & kid trails
+  {n:"Grächen Spieleweg / Hannigalp", c:"play", ll:[46.201, 7.847], d:"Ravensburger board-game trail ~4 km + Hannigalp playground. 30 min."},
+  {n:"Saas-Fee marmots (Spielboden)", c:"play", ll:[46.104, 7.925], d:"Car-free village; hand-fed marmots at Spielboden. 35 min."},
+  {n:"Bettmeralp", c:"play", ll:[46.391, 8.059], d:"Car-free plateau: playgrounds, Blausee loop, Bettmerhorn glacier lookout. Betten lift, 35 min."},
+  {n:"Riederalp", c:"play", ll:[46.377, 8.027], d:"Quieter Aletsch plateau variant. Mörel lift, 30 min."},
+  // thermal
+  {n:"Leukerbad thermal", c:"thermal", ll:[46.380, 7.627], d:"Big thermal complex — rainy-day banker. 35 min."},
+  {n:"Brigerbad thermal water park", c:"thermal", ll:[46.301, 7.941], d:"Outdoor thermal slides — low-effort day. 15 min."},
+  // anchors
+  {n:"Visp", c:"anchor", ll:[46.294, 7.881], d:"Corridor hub; trains up both valleys."},
+  {n:"Brig", c:"anchor", ll:[46.315, 7.987], d:"Town option; Stockalper palace; near Brigerbad."},
+  {n:"Täsch (park for Zermatt)", c:"anchor", ll:[46.067, 7.778], d:"Park here, 12-min shuttle train to car-free Zermatt."},
+  {n:"Zermatt", c:"anchor", ll:[46.021, 7.749], d:"Car-free; lifts to Sunnegga & Gornergrat."},
+];
+
+const BASES = [
+  {n:"Grächen", alt:"1,620 m", ll:[46.195, 7.838], dir:"right"},
+  {n:"Bürchen/Unterbäch", alt:"~1,350 m", ll:[46.283, 7.805], dir:"left"},
+  {n:"Visperterminen", alt:"1,340 m", ll:[46.258, 7.902], dir:"right"},
+  {n:"Naters / Blatten-b.-N.", alt:"700–1,320 m", ll:[46.335, 7.993], dir:"top"},
+];
+
+POIS.forEach(p => {
+  L.circleMarker(p.ll, {
+    radius: p.c === "anchor" ? 6 : 9,
+    color: "#ffffff", weight: 2,
+    fillColor: CAT[p.c], fillOpacity: 1
+  }).addTo(map)
+   .bindTooltip(`<b>${p.n}</b>`, {direction: "top", offset: [0, -8]})
+   .bindPopup(`<b>${p.n}</b><br>${p.d}`);
+});
+
+BASES.forEach(b => {
+  L.marker(b.ll, {icon: L.divIcon({className: "", html: '<div class="home-icon">🏠</div>', iconSize: [20, 20], iconAnchor: [10, 10]})})
+    .addTo(map)
+    .bindTooltip(`${b.n} (${b.alt})`, {permanent: true, direction: b.dir, offset: b.dir === "left" ? [-10, 0] : b.dir === "top" ? [0, -10] : [10, 0], className: "base-label"})
+    .bindPopup(`<b>${b.n}</b><br>Airbnb search zone — ${b.alt}`);
+});
+
+// Lötschberg car train (Kandersteg–Goppenstein)
+L.polyline([[46.494, 7.675], [46.368, 7.766]], {color: "#898781", weight: 2, dashArray: "6 6"})
+  .addTo(map)
+  .bindTooltip("Lötschberg car train (Autoverlad), ~15 min", {sticky: true});
+
+map.setView([46.24, 7.84], 10);
+</script>
+</body>
+</html>
