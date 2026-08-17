@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tue Aug 18 — Zermatt Sunnegga day</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  * { margin: 0; box-sizing: border-box; }
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
+    --walk: #eb6834; --lift: #2a78d6; --lake: #1baf7a;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page); color: var(--text-primary);
+    min-height: 100vh; padding: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7;
+      --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+      --walk: #d95926; --lift: #3987e5; --lake: #199e70;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7;
+    --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+    --walk: #d95926; --lift: #3987e5; --lake: #199e70;
+  }
+  .card { max-width: 760px; margin: 0 auto; background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  h1 { font-size: 16px; font-weight: 600; }
+  .sub { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 10px; }
+  #map { height: 62vh; min-height: 420px; border-radius: 8px; border: 1px solid var(--border); }
+  .legend { display: flex; gap: 14px; margin: 10px 0 2px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+  .key { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex: none; }
+  .sw { width: 20px; height: 0; border-top: 3px solid; display: inline-block; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  ol { margin: 8px 0 0 20px; font-size: 13px; }
+  li { margin: 4px 0; }
+  .note { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+  <div class="card">
+    <h1>Tuesday Aug 18 — Zermatt Sunnegga day</h1>
+    <div class="sub">Forecast: 0 mm · 10% · ~13 h sun. Kids under 9 free on all lifts; no reservations needed. Lines are schematic — follow the yellow signposts.</div>
+    <div id="map"></div>
+    <div class="legend">
+      <span class="key"><span class="sw" style="border-color:var(--lift); border-top-style:dashed"></span>Lift/train</span>
+      <span class="key"><span class="sw" style="border-color:var(--walk)"></span>Walk</span>
+      <span class="key"><span class="dot" style="background:var(--lake)"></span>Lake</span>
+      <span class="key"><span class="dot" style="background:#898781"></span>Station/logistics</span>
+    </div>
+    <ol>
+      <li><b>07:30</b> drive off Saas-Grund (~40 min via Stalden)</li>
+      <li><b>08:10</b> Täsch parking → <b>08:30</b> shuttle train (runs every 20 min) → 08:42 Zermatt</li>
+      <li><b>08:55</b> Sunnegga funicular (4.5 min tunnel ride) → gondola → <b>09:15 Blauherd</b> (2,571 m)</li>
+      <li><b>09:15–10:30</b> 5-Seenweg seg. 1: Blauherd → <b>Stellisee</b> and back (~2.6 km flattish) — mirror photos ~09:45, well before midday haze</li>
+      <li><b>10:35–11:45</b> <b>Murmelweg</b> descent Blauherd → Sunnegga (~2.4 km, marmot colonies near the bottom) — <i>or</i> 10-min gondola; split at Blauherd if Elio is done (one adult rides with him)</li>
+      <li><b>11:45–15:00</b> <b>Leisee</b>: swim (brisk!), Wolli playground, picnic or Sunnegga restaurant above</li>
+      <li><b>~15:00</b> funicular → 15:20 train → Täsch; home ~16:15 (stretch later if everyone's still going)</li>
+    </ol>
+    <div class="note">Pack: swim gear + fleeces + shells (≈7 °C at Blauherd early, T-shirt at Leisee by noon), carrier, carrots (Murmelweg = marmot retry #2), sunscreen — 2,500 m sun is fierce.</div>
+  </div>
+</div>
+<script>
+const map = L.map('map', { scrollWheelZoom: true });
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+const CS = getComputedStyle(document.querySelector('.viz-root'));
+const C = { walk: CS.getPropertyValue('--walk').trim(), lift: CS.getPropertyValue('--lift').trim(), lake: CS.getPropertyValue('--lake').trim(), anchor: '#898781' };
+
+const PTS = [
+  {n:"Täsch parking", ll:[46.067, 7.779], c:"anchor", d:"Park here (~CHF 16/day); shuttle train every 20 min."},
+  {n:"Zermatt Bahnhof", ll:[46.024, 7.749], c:"anchor", d:"Sunnegga funicular base is ~400 m walk (signed)."},
+  {n:"Sunnegga funicular base", ll:[46.0235, 7.7565], c:"anchor", d:"Tunnel funicular, 4.5 min."},
+  {n:"Sunnegga (2,288 m)", ll:[46.0110, 7.7724], c:"anchor", d:"Restaurant, gondola to Blauherd, Leisee just below."},
+  {n:"Blauherd (2,571 m)", ll:[46.0080, 7.7860], c:"anchor", d:"Trailheads: 5-Seenweg → Stellisee; Murmelweg → Sunnegga."},
+  {n:"Stellisee", ll:[46.0075, 7.7995], c:"lake", d:"THE Matterhorn mirror. Best light/calm before midday."},
+  {n:"Leisee", ll:[46.0095, 7.7712], c:"lake", d:"Swim lake + Wolli playground; 300 m below Sunnegga (short path or Leisi shuttle)."},
+];
+
+const LEGS = [
+  {n:"Shuttle train Täsch–Zermatt", mode:"lift", pts:[[46.067,7.779],[46.055,7.771],[46.040,7.760],[46.024,7.749]]},
+  {n:"Walk to funicular (~400 m)", mode:"walk", pts:[[46.024,7.749],[46.0235,7.7565]]},
+  {n:"Sunnegga funicular (tunnel)", mode:"lift", pts:[[46.0235,7.7565],[46.0110,7.7724]]},
+  {n:"Gondola Sunnegga→Blauherd", mode:"lift", pts:[[46.0110,7.7724],[46.0080,7.7860]]},
+  {n:"5-Seenweg seg. 1: Blauherd↔Stellisee (~1.3 km each way)", mode:"walk", pts:[[46.0080,7.7860],[46.0068,7.7925],[46.0075,7.7995]]},
+  {n:"Murmelweg: Blauherd→Sunnegga (~2.4 km down)", mode:"walk", pts:[[46.0080,7.7860],[46.0102,7.7815],[46.0090,7.7770],[46.0110,7.7724]]},
+  {n:"Sunnegga↔Leisee (~300 m)", mode:"walk", pts:[[46.0110,7.7724],[46.0095,7.7712]]},
+];
+
+LEGS.forEach(l => {
+  L.polyline(l.pts, {color: C[l.mode === "lift" ? "lift" : "walk"], weight: 4,
+    dashArray: l.mode === "lift" ? "8 8" : null, opacity: 0.85})
+   .addTo(map).bindTooltip(l.n, {sticky: true});
+});
+PTS.forEach(p => {
+  L.circleMarker(p.ll, { radius: p.c === "anchor" ? 6 : 9, color: "#ffffff", weight: 2, fillColor: C[p.c], fillOpacity: 1 })
+    .addTo(map)
+    .bindTooltip(`<b>${p.n}</b>`, {direction: "top", offset: [0, -8]})
+    .bindPopup(`<b>${p.n}</b><br>${p.d}`);
+});
+map.fitBounds([[46.002, 7.745],[46.070, 7.805]], {padding: [16, 16]});
+</script>
+</body>
+</html>
