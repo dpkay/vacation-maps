@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wed Aug 19 — Aletsch day (Bettmeralp)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  * { margin: 0; box-sizing: border-box; }
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
+    --walk: #eb6834; --lift: #2a78d6; --lake: #1baf7a;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page); color: var(--text-primary);
+    min-height: 100vh; padding: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7;
+      --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+      --walk: #d95926; --lift: #3987e5; --lake: #199e70;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7;
+    --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+    --walk: #d95926; --lift: #3987e5; --lake: #199e70;
+  }
+  .card { max-width: 760px; margin: 0 auto; background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  h1 { font-size: 16px; font-weight: 600; }
+  .sub { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 10px; }
+  #map { height: 60vh; min-height: 400px; border-radius: 8px; border: 1px solid var(--border); }
+  .legend { display: flex; gap: 14px; margin: 10px 0 2px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+  .key { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex: none; }
+  .sw { width: 20px; height: 0; border-top: 3px solid; display: inline-block; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  h2 { font-size: 13.5px; font-weight: 600; margin: 10px 0 2px; }
+  ol, ul { margin: 4px 0 0 20px; font-size: 13px; }
+  li { margin: 3px 0; }
+  .note { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+  <div class="card">
+    <h1>Wednesday Aug 19 — Aletsch day (Bettmeralp)</h1>
+    <div class="sub">Forecast: 20 °C at 1,950 m · 13.1 h sun · 3% rain — the plateau's best day of the week. Lines schematic — follow yellow signs. ~CHF 100–115 all-in (4× Halbtax, kids free).</div>
+    <div id="map"></div>
+    <div class="legend">
+      <span class="key"><span class="sw" style="border-color:var(--lift); border-top-style:dashed"></span>Lift</span>
+      <span class="key"><span class="sw" style="border-color:var(--walk)"></span>Walk (Option A)</span>
+      <span class="key"><span class="sw" style="border-color:var(--walk); border-top-style:dotted"></span>Walk (Option B traverse)</span>
+      <span class="key"><span class="dot" style="background:var(--lake)"></span>Lake</span>
+      <span class="key"><span class="dot" style="background:#898781"></span>Station / village</span>
+    </div>
+    <h2>Option A — standard (whole group)</h2>
+    <ol>
+      <li><b>08:00</b> depart Saas-Grund (~55 min) → <b>Betten Talstation</b> garage</li>
+      <li><b>09:15</b> cable car → Bettmeralp (village lifeline: runs ~06:00–23:00, no stranding risk)</li>
+      <li><b>09:45 Bettmerhorn gondola</b> → glacier view deck in morning clarity (last descent ~16:30 — hence first)</li>
+      <li><b>~11:15</b> walk DOWN from the deck via the signed <b>Blausee</b> route (lake sits ~250 m above the village — descending to it from Bettmerhorn beats climbing to it; confirm gradient on the top-station panorama board). Picnic at the lake, continue down to the village. Carrier for Elio; stroller waits at the village station; grandparents ride the gondola down.</li>
+      <li><b>13:30–16:00 Bettmersee</b>: pedalo, swim for the brave, big playground; grandparents on the lawn</li>
+      <li><b>~16:30</b> cable car down, home ~17:45</li>
+    </ol>
+    <h2>Option B — the traverse (decide at the deck ~11:00)</h2>
+    <ol>
+      <li>Bettmerhorn → <b>Gletscherweg ridge to Moosfluh</b> (~2.5 km, glacier alongside; carrier for Elio)</li>
+      <li>Moosfluh gondola down → <b>Riederalp</b>: lunch, Villa Cassel garden or Aletschwald slice</li>
+      <li>Flat <b>Panoramaweg back to Bettmeralp</b> (~2 km); Bettmersee closer if time; lift down</li>
+      <li class="note">B skips Blausee by design — the ridge outbids it. Grandparents: lift-served parallel track, reunite at Riederalp lunch. Stroller parks at Bettmerhorn village station, reclaimed on return.</li>
+    </ol>
+    <div class="note"><b>Morning gate:</b> Bettmeralp webcam at breakfast — fog against the odds → flip to a Saastal day. <b>Pack:</b> picnic, swim gear, carrier, fleeces for the deck (2,647 m), sunscreen.</div>
+  </div>
+</div>
+<script>
+const map = L.map('map', { scrollWheelZoom: true });
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+const CS = getComputedStyle(document.querySelector('.viz-root'));
+const C = { walk: CS.getPropertyValue('--walk').trim(), lift: CS.getPropertyValue('--lift').trim(), lake: CS.getPropertyValue('--lake').trim(), anchor: '#898781' };
+
+const PTS = [
+  {n:"Betten Talstation", ll:[46.372, 8.068], c:"anchor", d:"Park here; cable car every ~30 min, runs ~06:00–23:00 (SBB app: 'Betten Talstation')."},
+  {n:"Bettmeralp village", ll:[46.3915, 8.0605], c:"anchor", d:"Car-free village: chapel Maria zum Schnee, big playground, restaurants. Ask tourist office about a Detektiv-Trail."},
+  {n:"Bettmerhorn (2,647 m)", ll:[46.4005, 8.0855], c:"anchor", d:"THE glacier view deck + restaurant. Gondola from village; last descent ~16:30 — do it FIRST."},
+  {n:"Blausee (2,207 m)", ll:[46.396, 8.049], c:"lake", d:"Scenic lakelet ~250 m ABOVE the village. Reach it downhill from Bettmerhorn (Option A) or via a ~45-min climb from the village. Picnic spot."},
+  {n:"Bettmersee", ll:[46.3893, 8.0555], c:"lake", d:"Village lake: pedalo/rowboat rental, swimming, lawn — the afternoon anchor."},
+  {n:"Moosfluh (2,333 m)", ll:[46.4056, 8.0428], c:"anchor", d:"Closest-to-the-ice viewpoint; gondola down to Riederalp. Option B waypoint."},
+  {n:"Riederalp", ll:[46.3765, 8.0295], c:"anchor", d:"Quieter sister village: lunch, Alpmuseum. Option B's midpoint."},
+  {n:"Villa Cassel / Riederfurka", ll:[46.386, 8.021], c:"anchor", d:"Victorian Pro Natura villa, gardens, nature exhibitions; gateway to the Aletschwald arolla forest."},
+];
+
+const LEGS = [
+  {n:"Cable car Betten→Bettmeralp", mode:"lift", style:"dash", pts:[[46.372,8.068],[46.3915,8.0605]]},
+  {n:"Gondola Bettmeralp→Bettmerhorn", mode:"lift", style:"dash", pts:[[46.3915,8.0605],[46.4005,8.0855]]},
+  {n:"A: descent Bettmerhorn→Blausee→village (downhill; confirm gradient at top station)", mode:"walk", style:"solid", pts:[[46.4005,8.0855],[46.401,8.070],[46.398,8.057],[46.396,8.049],[46.3935,8.0555],[46.3915,8.0605]]},
+  {n:"A: village↔Bettmersee (short)", mode:"walk", style:"solid", pts:[[46.3915,8.0605],[46.3893,8.0555]]},
+  {n:"B: Gletscherweg ridge Bettmerhorn→Moosfluh (~2.5 km)", mode:"walk", style:"dot", pts:[[46.4005,8.0855],[46.406,8.070],[46.407,8.056],[46.4056,8.0428]]},
+  {n:"B: Moosfluh gondola → Riederalp", mode:"lift", style:"dash", pts:[[46.4056,8.0428],[46.3765,8.0295]]},
+  {n:"B: Panoramaweg Riederalp→Bettmeralp (~2 km, flat)", mode:"walk", style:"dot", pts:[[46.3765,8.0295],[46.381,8.043],[46.3855,8.053],[46.3915,8.0605]]},
+];
+
+LEGS.forEach(l => {
+  L.polyline(l.pts, {color: C[l.mode === "lift" ? "lift" : "walk"], weight: 4,
+    dashArray: l.style === "dash" ? "8 8" : l.style === "dot" ? "2 7" : null, opacity: 0.85})
+   .addTo(map).bindTooltip(l.n, {sticky: true});
+});
+PTS.forEach(p => {
+  L.circleMarker(p.ll, { radius: p.c === "anchor" ? 6 : 9, color: "#ffffff", weight: 2, fillColor: C[p.c], fillOpacity: 1 })
+    .addTo(map)
+    .bindTooltip(`<b>${p.n}</b>`, {direction: "top", offset: [0, -8]})
+    .bindPopup(`<b>${p.n}</b><br>${p.d}`);
+});
+map.fitBounds([[46.368, 8.010],[46.412, 8.095]], {padding: [16, 16]});
+</script>
+</body>
+</html>
