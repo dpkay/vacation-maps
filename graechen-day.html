@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sat Aug 22 — Grächen/Hannigalp day</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  * { margin: 0; box-sizing: border-box; }
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
+    --walk: #eb6834; --lift: #2a78d6; --lake: #1baf7a;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page); color: var(--text-primary);
+    min-height: 100vh; padding: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7;
+      --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+      --walk: #d95926; --lift: #3987e5; --lake: #199e70;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7;
+    --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+    --walk: #d95926; --lift: #3987e5; --lake: #199e70;
+  }
+  .card { max-width: 760px; margin: 0 auto; background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  h1 { font-size: 16px; font-weight: 600; }
+  .sub { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 10px; }
+  #map { height: 60vh; min-height: 400px; border-radius: 8px; border: 1px solid var(--border); }
+  .legend { display: flex; gap: 14px; margin: 10px 0 2px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+  .key { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex: none; }
+  .sw { width: 20px; height: 0; border-top: 3px solid; display: inline-block; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  h2 { font-size: 13.5px; font-weight: 600; margin: 10px 0 2px; }
+  ol, ul { margin: 4px 0 0 20px; font-size: 13px; }
+  li { margin: 3px 0; }
+  .note { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+  <div class="card">
+    <h1>Saturday Aug 22 — Grächen / Hannigalp day</h1>
+    <div class="sub">Week's best forecast: 13 h sun · 5% · 17 °C at the village. ~CHF 50 lifts (4× Halbtax, kids under 6 free). Drive ~40 min. Check last gondola descent on arrival (~16:30–17:00).</div>
+    <div id="map"></div>
+    <div class="legend">
+      <span class="key"><span class="sw" style="border-color:var(--lift); border-top-style:dashed"></span>Lift</span>
+      <span class="key"><span class="sw" style="border-color:var(--walk)"></span>Spieleweg loop</span>
+      <span class="key"><span class="sw" style="border-color:#898781"></span>Drives</span>
+            <span class="key"><span class="dot" style="background:#898781"></span>Station / village</span>
+    </div>
+    <h2>Core itinerary</h2>
+    <ol>
+      <li><b>08:45</b> depart Saas-Grund → <b>09:30</b> Grächen talstation; gondola to <b>Hannigalp (2,121 m)</b></li>
+      <li><b>10:00–12:30 Ravensburger Spieleweg</b> — board-game station trail, ~4 km at play-every-station pace; Elio walks the hops, carrier reserve; grandparents on the trail or the terrace</li>
+      <li><b>12:30</b> lunch — trail picnic or Hannigalp bergrestaurant</li>
+      <li><b>13:30–15:00</b> Hannigalp adventure playground</li>
+      <li><b>~15:30</b> gondola down; gelato in the village (old larch houses, pretty square)</li>
+    </ol>
+    <h2>Superset — if the day runs fast (in order)</h2>
+    <ol>
+      <li><b>Suonen walk</b> — Grächen's medieval irrigation channels through larch forest (Eggeri/Chilcheri): flat, any length, kids race sticks in the flowing water. Mostly stroller-OK.</li>
+      <li><b>Moosalp detour</b> on the way home (via Törbel, ~25 min extra) — ponds, cows, zero cost, closes the last unplayed easy card</li>
+      <li><b>Feeblitz on re-entry</b> (if still unridden) — Saas-Fee is 10 min past home; end on a toboggan note</li>
+      <li>Kapellenweg / village playground as the evening valve</li>
+    </ol>
+    <div class="note"><b>Stroller:</b> gondola yes; Spieleweg = carrier-reserve terrain (roots); playground, village, Suonen mostly fine.</div>
+    <div class="note"><b>Pack:</b> picnic, carrier, fleeces for the morning (2,100 m), sunscreen — and carrots stay home: tomorrow is marmot day.</div>
+  </div>
+</div>
+<script>
+const map = L.map('map', { scrollWheelZoom: true });
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+const CS = getComputedStyle(document.querySelector('.viz-root'));
+const C = { walk: CS.getPropertyValue('--walk').trim(), lift: CS.getPropertyValue('--lift').trim(), lake: CS.getPropertyValue('--lake').trim(), anchor: '#898781' };
+
+const PTS = [
+  {n:"Grächen talstation", ll:[46.197, 7.836], c:"anchor", d:"Park here; gondola to Hannigalp. Check last descent on the board (~16:30–17:00)."},
+  {n:"Hannigalp (2,121 m)", ll:[46.208, 7.852], c:"anchor", d:"Spieleweg trailhead, adventure playground, bergrestaurant terrace."},
+  {n:"Grächen village", ll:[46.195, 7.838], c:"anchor", d:"Old larch houses, square, gelato; Suonen walks start here (Eggeri/Chilcheri)."},
+  {n:"Stalden (junction)", ll:[46.233, 7.872], c:"anchor", d:"Valley junction: Saastal ↔ Mattertal; Törbel/Moosalp road branches here."},
+  {n:"Moosalp (2,048 m)", ll:[46.245, 7.796], c:"anchor", d:"Superset detour on the way home: ponds, cows, free."},
+  {n:"Saas-Grund (home)", ll:[46.124, 7.936], c:"anchor", d:"Montela. Feeblitz option: Saas-Fee 10 min further."},
+];
+
+const LEGS = [
+  {n:"Drive Saas-Grund→Stalden→Grächen (~40 min)", mode:"drive", style:"dash", pts:[[46.124,7.936],[46.180,7.905],[46.233,7.872],[46.215,7.848],[46.197,7.836]]},
+  {n:"Gondola Grächen→Hannigalp", mode:"lift", style:"dash", pts:[[46.197,7.836],[46.208,7.852]]},
+  {n:"Ravensburger Spieleweg (loop ~4 km, station-chopped)", mode:"walk", style:"solid", pts:[[46.208,7.852],[46.213,7.862],[46.209,7.870],[46.203,7.862],[46.208,7.852]]},
+  {n:"Superset: Moosalp detour via Törbel", mode:"drive", style:"dash", pts:[[46.233,7.872],[46.240,7.835],[46.245,7.796]]},
+];
+
+LEGS.forEach(l => {
+  L.polyline(l.pts, {color: l.mode === "drive" ? "#898781" : C[l.mode === "lift" ? "lift" : "walk"], weight: 4,
+    dashArray: l.style === "dash" ? "8 8" : l.style === "dot" ? "2 7" : null, opacity: 0.85})
+   .addTo(map).bindTooltip(l.n, {sticky: true});
+});
+PTS.forEach(p => {
+  L.circleMarker(p.ll, { radius: p.c === "anchor" ? 6 : 9, color: "#ffffff", weight: 2, fillColor: C[p.c], fillOpacity: 1 })
+    .addTo(map)
+    .bindTooltip(`<b>${p.n}</b>`, {direction: "top", offset: [0, -8]})
+    .bindPopup(`<b>${p.n}</b><br>${p.d}`);
+});
+map.fitBounds([[46.115, 7.780],[46.255, 7.950]], {padding: [16, 16]});
+</script>
+</body>
+</html>
